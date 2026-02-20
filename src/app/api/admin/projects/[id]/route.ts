@@ -1,11 +1,12 @@
 export const runtime = "nodejs";
 
-import { NextResponse } from "next/server";
+import { NextRequest, NextResponse } from "next/server";
 import jwt from "jsonwebtoken";
 import { connectDB } from "@/lib/mongodb";
 import Project from "@/models/Project";
 
-function verify(req: Request) {
+/* 🔥 Token Verification */
+function verify(req: NextRequest) {
   const auth = req.headers.get("authorization");
 
   if (!auth || !auth.startsWith("Bearer ")) {
@@ -17,18 +18,21 @@ function verify(req: Request) {
   jwt.verify(token, process.env.ADMIN_JWT_SECRET!);
 }
 
-// ✅ GET
+/* ===================== */
+/*         GET           */
+/* ===================== */
+
 export async function GET(
-  req: Request,
-  { params }: { params: Promise<{ id: string }> }
+  req: NextRequest,
+  context: { params: Promise<{ id: string }> }
 ) {
   try {
     verify(req);
     await connectDB();
 
-    const { id } = await params; // 🔥 FIX HERE
+    const { id } = await context.params;
 
-    const project = await Project.findById(id);
+    const project = await Project.findById(id).lean();
 
     if (!project) {
       return NextResponse.json(
@@ -42,27 +46,30 @@ export async function GET(
     console.error("GET error:", error.message);
 
     return NextResponse.json(
-      { error: error.message || "Server error" },
+      { error: error.message || "Unauthorized" },
       { status: 401 }
     );
   }
 }
 
-// ✅ PUT
+/* ===================== */
+/*         PUT           */
+/* ===================== */
+
 export async function PUT(
-  req: Request,
-  { params }: { params: Promise<{ id: string }> }
+  req: NextRequest,
+  context: { params: Promise<{ id: string }> }
 ) {
   try {
     verify(req);
     await connectDB();
 
-    const { id } = await params; // 🔥 FIX HERE
+    const { id } = await context.params;
     const body = await req.json();
 
     const project = await Project.findByIdAndUpdate(id, body, {
       new: true,
-    });
+    }).lean();
 
     if (!project) {
       return NextResponse.json(
@@ -76,7 +83,7 @@ export async function PUT(
     console.error("PUT error:", error.message);
 
     return NextResponse.json(
-      { error: error.message || "Server error" },
+      { error: error.message || "Unauthorized" },
       { status: 401 }
     );
   }
