@@ -48,7 +48,7 @@ export const metadata: Metadata = {
   twitter: {
     card: "summary_large_image",
     creator: "@omryakawar",
-    title: "OMKAR RYAKAWAR |Full Stack & DevOps Engineer – Portfolio",
+    title: "OMKAR RYAKAWAR | Portfolio",
     description: "Full-stack & DevOps engineer building modern web systems.",
     images: ["https://your-domain.com/og-image.png"],
   },
